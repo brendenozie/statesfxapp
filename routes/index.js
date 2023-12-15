@@ -401,25 +401,26 @@ router.post('/loginconfirmcheck',urlencodedparser,async function(req, res) {
         };
     } 
 
-    let messageBody = {email:req.body.email,
-                        password:req.body.password};
+    let messageBody =req.body.data;// {email:req.body.data.email,
+                        //password:req.body.data.password};
     
     var lgin=await srs.loginCheck(messageBody);
 
     if(lgin){
-            req.session.cart = {mtoken:"reqbodytoken",
-                phone: lgin.phone,
-                id: lgin.id,
-                firstname: lgin.firstname,
-                lastname: lgin.lastname,
-                email: lgin.email,                
-                subscription: lgin.subscription,
-                course: lgin.course,
-                message: lgin.message,
-                password: "&&&&&&&",
-                merchantRequestID:'',
-                checkoutRequestID:''
-                };
+            // req.session.cart = {mtoken:"reqbodytoken",
+            //     phone: lgin.phone,
+            //     id: lgin.id,
+            //     firstname: lgin.firstname,
+            //     lastname: lgin.lastname,
+            //     email: lgin.email,                
+            //     subscription: lgin.subscription,
+            //     course: lgin.course,
+            //     message: lgin.message,
+            //     password: "&&&&&&&",
+            //     merchantRequestID:'',
+            //     checkoutRequestID:''
+            //     };
+            console.log(lgin);
 
         return res.send({
             success:true,
@@ -429,6 +430,57 @@ router.post('/loginconfirmcheck',urlencodedparser,async function(req, res) {
         return res.send({
             success:false,
             data:{error : "Login Error"}
+        }); 
+    }
+});
+
+
+router.post('/registerconfirmcheck',urlencodedparser,async function(req, res) {
+    if(!req.session.cart) {
+        req.session.cart = {
+            items: [],
+            totals: 0.00,
+            pricetotals:0.00,
+            delivary_payment:0.00,
+            subscription: "",
+            id:"",
+            shipping:"",
+            merchantRequestID:"",
+            checkoutRequestID:"",
+            picktime:"",
+            promocode:"",
+            promoamount:0.00,
+            mtoken:""
+        };
+    } 
+
+    let messageBody = req.body;
+    
+    var reg=await srs.setUser(messageBody);
+
+    if(reg){
+            // req.session.cart = {mtoken:"reqbodytoken",
+            //     phone: reg.phone,
+            //     id: reg.id,
+            //     firstname: reg.firstname,
+            //     lastname: reg.lastname,
+            //     email: reg.email,                
+            //     subscription: reg.subscription,
+            //     course: reg.course,
+            //     message: reg.message,
+            //     password: "&&&&&&&",
+            //     merchantRequestID:'',
+            //     checkoutRequestID:''
+            //     };
+
+        return res.send({
+            success:true,
+            data:reg
+        });     
+    }else{
+        return res.send({
+            success:false,
+            data:{error : "Register Error"}
         }); 
     }
 });

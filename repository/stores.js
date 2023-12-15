@@ -14,16 +14,10 @@ var db = admin.firestore();
 
 module.exports.database=db;
 
-
-module.exports.setUser = async function getUser(id) {
-                            await db.collection('users').doc(id).set({
-                                first: 'Liam',
-                                last: 'Ragozzine',
-                                address: '133 5th St., San Francisco, CA',
-                                birthday: '05/13/1990',
-                                age: '30'
-                            });
-                        }
+module.exports.setUser = async function setUser(userDetails) {
+    const path_ref = await db.collection('users').add(userDetails);
+    return path_ref;
+}
 
 module.exports.getUser = async function getUser(id) {
                             await db.collection('users').doc('vpeluso').set({
@@ -288,11 +282,11 @@ module.exports.editPost = async function editPost(post){
 
 module.exports.loginCheck = async function loginCheck(message){
 
-    var usr = {};
+    let usr = {};
 
     const userS = db.collection("users");
 
-    await userS.where('email', '==', `${message.email}`)
+    usr = await userS.where('email', '==', `${message.email}`)
     .get()
     .then(async snapshots => {
         if (snapshots.size > 0){
