@@ -401,25 +401,11 @@ router.post('/loginconfirmcheck',urlencodedparser,async function(req, res) {
         };
     } 
 
-    let messageBody =req.body.data;// {email:req.body.data.email,
-                        //password:req.body.data.password};
+    let messageBody =req.body.data;
     
     var lgin=await srs.loginCheck(messageBody);
 
     if(lgin){
-            // req.session.cart = {mtoken:"reqbodytoken",
-            //     phone: lgin.phone,
-            //     id: lgin.id,
-            //     firstname: lgin.firstname,
-            //     lastname: lgin.lastname,
-            //     email: lgin.email,                
-            //     subscription: lgin.subscription,
-            //     course: lgin.course,
-            //     message: lgin.message,
-            //     password: "&&&&&&&",
-            //     merchantRequestID:'',
-            //     checkoutRequestID:''
-            //     };
             console.log(lgin);
 
         return res.send({

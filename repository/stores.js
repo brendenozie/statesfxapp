@@ -283,18 +283,24 @@ module.exports.editPost = async function editPost(post){
 module.exports.loginCheck = async function loginCheck(message){
 
     let usr = {};
+    let email = message.email;
 
     const userS = db.collection("users");
 
-    usr = await userS.where('email', '==', `${message.email}`)
+    await userS.where('email', '==', email)
     .get()
     .then(async snapshots => {
-        if (snapshots.size > 0){
-           snapshots.docs.map((doc) => {
+        if (snapshots.empty){
+            console.log(`${email} test2`);
+        }
+        else{
+            snapshots.docs.map((doc) => {
                 let usl = doc.data();
                 if (usl.password == message.password) {
                     usl.id=doc.id;
                     usr=usl;
+                }else{
+                    usr={};
                 }
             });
         } 
