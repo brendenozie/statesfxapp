@@ -15,7 +15,8 @@ var db = admin.firestore();
 module.exports.database=db;
 
 module.exports.setUser = async function setUser(userDetails) {
-    const path_ref = await db.collection('users').add(userDetails);
+    let path_ref = await db.collection('users').add(userDetails);
+    await db.collection('users').doc(path_ref.id).set({user_id: true}, { merge: true }); 
     return path_ref;
 }
 
@@ -252,9 +253,45 @@ module.exports.getOrderCart=async function getOrderCart(uid){
 
 };
 
+module.exports.uploadTransaction = async function uploadTransaction(post){
+
+    let newDoc = await db.collection('transactions').add(post); 
+    await db.collection('transactions').doc(newDoc.id).set({transaction_id: true}, { merge: true }); 
+
+    let userRef = db.collection("users");
+
+    await userRef.where('email', '==', `${post.initiator}`)
+    .get()
+    .then(snapshots => {
+        if (snapshots.size > 0) {
+            snapshots.forEach(async orderItem => {
+                // initiator.doc(orderItem.id).update({ status: "paid" })
+                await db.collection("account").where('user_id', '==', `${orderItem.id}`)
+                        .get()
+                        .then(snapshots => {
+                                snapshots.map(async orderItem => {
+                                    if(orderItem.transaction_type == "transfer"){
+                                        orderItem.current_balance = orderItem.current_balance - post.transaction_amount;
+                                        await db.collection("account").doc(orderItem.id).update({ current_balance: orderItem.current_balance });
+                                    }else{
+                                        orderItem.current_balance = orderItem.current_balance + post.transaction_amount;
+                                        await db.collection("account").doc(orderItem.id).update({ current_balance: orderItem.current_balance });
+                                    }
+                                })
+                        });
+            })
+        }
+    });
+  
+    return newDoc;
+}
+
+
 module.exports.uploadPost = async function uploadPost(post){
 
-    await db.collection('posts').add(post); 
+    let newDoc =await db.collection('posts').add(post) 
+
+            
   
     return post;
 }
@@ -289,20 +326,12 @@ module.exports.loginCheck = async function loginCheck(message){
 
     await userS.where('email', '==', email)
     .get()
-    .then(async snapshots => {
+    .then(snapshots => {
         if (snapshots.empty){
             console.log(`${email} test2`);
         }
         else{
-            snapshots.docs.map((doc) => {
-                let usl = doc.data();
-                if (usl.password == message.password) {
-                    usl.id=doc.id;
-                    usr=usl;
-                }else{
-                    usr={};
-                }
-            });
+            usr=snapshots.docs[0].data();
         } 
     }); 
     
@@ -361,6 +390,39 @@ module.exports.getApprovedTestimonials=async function getApprovedTestimonials(){
     return collection;
 
 };
+
+// get transaction
+module.exports.getAllTransactions = async function getAllTransactions() {
+    const path_ref = db.collection("transactions");
+    
+    let collection = [];
+    
+    await path_ref.get().then((querySnapshot) => {
+        querySnapshot.docs.map((doc) => {
+            collection.push(doc.data());
+        })
+      })
+
+    return collection;
+
+}
+
+
+// get accounts
+module.exports.getAllAccounts = async function getAllAccounts() {
+    const path_ref = db.collection("account");
+    
+    let collection = [];
+    
+    await path_ref.get().then((querySnapshot) => {
+        querySnapshot.docs.map((doc) => {
+            collection.push(doc.data());
+        })
+      })
+
+    return collection;
+
+}
 
 // get collection
 module.exports.getAllTestimonials = async function getAllTestimonials() {

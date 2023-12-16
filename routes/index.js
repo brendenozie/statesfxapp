@@ -406,11 +406,10 @@ router.post('/loginconfirmcheck',urlencodedparser,async function(req, res) {
     var lgin=await srs.loginCheck(messageBody);
 
     if(lgin){
-            console.log(lgin);
-
         return res.send({
             success:true,
-            data:lgin
+            status:200,
+            body:lgin
         });     
     }else{
         return res.send({
@@ -440,7 +439,7 @@ router.post('/registerconfirmcheck',urlencodedparser,async function(req, res) {
         };
     } 
 
-    let messageBody = req.body;
+    let messageBody = req.body.data;
     
     var reg=await srs.setUser(messageBody);
 
@@ -499,6 +498,78 @@ router.post('/deleteblog',urlencodedparser,async function(req, res) {
         data:lgin
     });     
     
+});
+
+router.get('/get-transactions', async function(req, res){
+    
+    if(!req.session.cart) {
+        req.session.cart = {mtoken:"",
+        phone: "", 
+        id: "",
+        firstname: "",
+        lastname: "",
+        subscription: "",
+        course: "",
+        message: "",
+        merchantRequestID:'',
+        checkoutRequestID:''
+        };
+    }   
+
+    var psts=await srs.getAllTransactions();
+
+    if(psts){         
+        return res.json({InfoResponse:{
+            count: 0,
+            next: 2 ,
+            pages: 1 ,
+            prev: 0},
+            results: psts
+        });                 
+        // return res.send({
+        //     success:true,
+        //     data:psts
+        // });            
+    }else{
+        return res.send({
+            success:false,
+            psts
+        });
+    }    
+});
+
+router.get('/get-accounts', async function(req, res){
+    
+    if(!req.session.cart) {
+        req.session.cart = {mtoken:"",
+        phone: "", 
+        id: "",
+        firstname: "",
+        lastname: "",
+        subscription: "",
+        course: "",
+        message: "",
+        merchantRequestID:'',
+        checkoutRequestID:''
+        };
+    }   
+
+    var psts=await srs.getAllAccounts();
+
+    if(psts){         
+        return res.json({InfoResponse:{
+            count: 0,
+            next: 2 ,
+            pages: 1 ,
+            prev: 0},
+            results: psts
+        });             
+    }else{
+        return res.send({
+            success:false,
+            psts
+        });
+    }    
 });
 
 router.get('/admintestimonial', async function(req, res){
@@ -1070,6 +1141,87 @@ router.get('/fconfirmed', (req, res) => {
     }   
 
     res.render('fconfirmed',{cart:req.session.cart});     
+});
+
+
+router.post('/post-requests', async (req, res) => {
+
+    if(!req.session.cart) {
+        req.session.cart = {mtoken:"",
+        phone: "", 
+        id: "",
+        firstname: "",
+        subscription: "",
+        lastname: "",
+        course: "",
+        message: "",
+        merchantRequestID:'',
+        checkoutRequestID:''
+        };
+    }   
+
+    let post = {
+                initiator: req.body.initiator,
+                recepient:req.body.recepient,
+                status:req.body.status,
+                transaction_amount:req.body.transaction_amount,
+                transaction_type:req.body.transaction_type,
+                dte: Date.now().toLocaleString()
+            };
+    
+    var lgin=await srs.uploadTransaction(post);
+
+    if(lgin){                               
+        return res.send({
+            success:true,
+            data:post
+        });            
+    }else{
+        return res.send({
+            success:false,
+            post
+        });
+    }
+});
+
+router.post('/post-transfers', async (req, res) => {
+
+    if(!req.session.cart) {
+        req.session.cart = {mtoken:"",
+        phone: "", 
+        id: "",
+        firstname: "",
+        subscription: "",
+        lastname: "",
+        course: "",
+        message: "",
+        merchantRequestID:'',
+        checkoutRequestID:''
+        };
+    }   
+
+    let post = {
+        initiator: req.body.initiator,
+        recepient:req.body.recepient,
+        status:req.body.status,
+        transaction_amount:req.body.transaction_amount,
+        transaction_type:req.body.transaction_type,
+        dte: Date.now().toLocaleString()
+    };
+    
+    var lgin=await srs.uploadTransaction(post);
+
+    if(lgin){                               
+        return res.send({
+            success:true,
+            data:post
+        });            
+    }else{
+        return res.send({
+            success:false,
+            post
+        });
+    }
 });
 
 router.post('/addblogpost', async (req, res) => {
