@@ -402,10 +402,13 @@ router.post('/loginconfirmcheck',urlencodedparser,async function(req, res) {
     } 
 
     let messageBody =req.body.data;
+
+    console.log(messageBody);
     
     var lgin=await srs.loginCheck(messageBody);
 
     if(lgin){
+        console.log(lgin);
         return res.send({
             success:true,
             status:200,

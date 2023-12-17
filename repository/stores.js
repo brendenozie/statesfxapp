@@ -194,7 +194,7 @@ module.exports.getMyReferrals=async function getMyReferrals(uid){
                 collection[doc.id] = doc.data();
             })
     } else{
-        console.log("nothinnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnng")
+        console.log("nothing")
     }
     }
 ); 
@@ -255,35 +255,33 @@ module.exports.getOrderCart=async function getOrderCart(uid){
 
 module.exports.uploadTransaction = async function uploadTransaction(post){
 
-    let newDoc = await db.collection('transactions').add(post); 
-    await db.collection('transactions').doc(newDoc.id).set({transaction_id: true}, { merge: true }); 
-
     let userRef = db.collection("users");
 
     await userRef.where('email', '==', `${post.initiator}`)
     .get()
-    .then(snapshots => {
-        if (snapshots.size > 0) {
-            snapshots.forEach(async orderItem => {
-                // initiator.doc(orderItem.id).update({ status: "paid" })
+    .then(async snapshots => {
+            snapshots.docs.map(async orderItem => {
                 await db.collection("account").where('user_id', '==', `${orderItem.id}`)
                         .get()
-                        .then(snapshots => {
-                                snapshots.map(async orderItem => {
-                                    if(orderItem.transaction_type == "transfer"){
-                                        orderItem.current_balance = orderItem.current_balance - post.transaction_amount;
-                                        await db.collection("account").doc(orderItem.id).update({ current_balance: orderItem.current_balance });
+                        .then(snapshots1 => {
+                                snapshots1.docs.map(async orderItem2 => {
+                                    let ot2=orderItem2.data();
+                                    if(post.transaction_type == "transfer"){
+                                        let currentbalance = ot2.current_balance - post.transaction_amount;
+                                        await db.collection("account").doc(orderItem2.id).update({ current_balance: currentbalance });
                                     }else{
-                                        orderItem.current_balance = orderItem.current_balance + post.transaction_amount;
-                                        await db.collection("account").doc(orderItem.id).update({ current_balance: orderItem.current_balance });
+                                        let currentbalanc = ot2.current_balance + post.transaction_amount;
+                                        await db.collection("account").doc(orderItem2.id).update({ current_balance: currentbalanc });
                                     }
                                 })
                         });
             })
-        }
     });
+
+    let newDoc = await db.collection('transactions').add(post); 
+    await db.collection('transactions').doc(newDoc.id).set({transaction_id: true}, { merge: true }); 
   
-    return newDoc;
+    return post;
 }
 
 
@@ -404,6 +402,21 @@ module.exports.getAllTransactions = async function getAllTransactions() {
       })
 
     return collection;
+}
+
+// get transaction
+module.exports.getAllTransactionsByEmail = async function getAllTransactionsByEmail(email) {
+    const path_ref = db.collection("transactions");
+    
+    let collection = [];
+    
+    await path_ref.get().then((querySnapshot) => {
+        querySnapshot.docs.map((doc) => {
+            collection.push(doc.data());
+        })
+      })
+
+    return collection;
 
 }
 
@@ -423,6 +436,24 @@ module.exports.getAllAccounts = async function getAllAccounts() {
     return collection;
 
 }
+
+
+// get accounts
+module.exports.getAllAccountsById = async function getAllAccountsById(id) {
+    const path_ref = db.collection("account");
+    
+    let collection = [];
+    
+    await path_ref.where("user_id","==",id).get().then((querySnapshot) => {
+        querySnapshot.docs.map((doc) => {
+            collection.push(doc.data());
+        })
+      })
+
+    return collection;
+
+}
+
 
 // get collection
 module.exports.getAllTestimonials = async function getAllTestimonials() {
