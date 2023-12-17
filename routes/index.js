@@ -402,13 +402,10 @@ router.post('/loginconfirmcheck',urlencodedparser,async function(req, res) {
     } 
 
     let messageBody =req.body.data;
-
-    console.log(messageBody);
     
     var lgin=await srs.loginCheck(messageBody);
 
     if(lgin){
-        console.log(lgin);
         return res.send({
             success:true,
             status:200,
@@ -519,26 +516,70 @@ router.get('/get-transactions', async function(req, res){
         };
     }   
 
-    var psts=await srs.getAllTransactions();
 
-    if(psts){         
-        return res.json({InfoResponse:{
-            count: 0,
-            next: 2 ,
-            pages: 1 ,
-            prev: 0},
-            results: psts
-        });                 
-        // return res.send({
-        //     success:true,
-        //     data:psts
-        // });            
+    var userEmail=req.query.userEmail;
+
+    if(userEmail){
+        var psts=await srs.getAllTransactionsByEmail(userEmail);
+        if(psts){         
+            return res.json({
+                InfoResponse:{
+                    count: 0,
+                    next: 2 ,
+                    pages: 1 ,
+                    prev: 0
+                },
+                results: psts
+            });             
+        }else{
+            return res.send({
+                success:false,
+                psts
+            });
+        }  
     }else{
-        return res.send({
-            success:false,
-            psts
-        });
-    }    
+        var psts=await srs.getAllTransactions();
+        if(psts){         
+            return res.json(
+                {
+                    InfoResponse:{
+                        count: 0,
+                        next: 2 ,
+                        pages: 1 ,
+                        prev: 0},
+                        results: psts
+                    }
+            );             
+        }else{
+            return res.send({
+                success:false,
+                psts
+            });
+        } 
+    }
+  
+
+    // var psts=await srs.getAllTransactions();
+
+    // if(psts){         
+    //     return res.json({InfoResponse:{
+    //         count: 0,
+    //         next: 2 ,
+    //         pages: 1 ,
+    //         prev: 0},
+    //         results: psts
+    //     });                 
+    //     // return res.send({
+    //     //     success:true,
+    //     //     data:psts
+    //     // });            
+    // }else{
+    //     return res.send({
+    //         success:false,
+    //         psts
+    //     });
+    // } 
+
 });
 
 router.get('/get-accounts', async function(req, res){
@@ -557,22 +598,47 @@ router.get('/get-accounts', async function(req, res){
         };
     }   
 
-    var psts=await srs.getAllAccounts();
+    var userId=req.query.userId;
 
-    if(psts){         
-        return res.json({InfoResponse:{
-            count: 0,
-            next: 2 ,
-            pages: 1 ,
-            prev: 0},
-            results: psts
-        });             
+    if(userId){
+        var psts=await srs.getAllAccountsById(userId);
+        if(psts){         
+            return res.json({
+                InfoResponse:{
+                    count: 0,
+                    next: 2 ,
+                    pages: 1 ,
+                    prev: 0
+                },
+                results: psts
+            });             
+        }else{
+            return res.send({
+                success:false,
+                psts
+            });
+        }  
     }else{
-        return res.send({
-            success:false,
-            psts
-        });
-    }    
+        var psts=await srs.getAllAccounts();
+        if(psts){         
+            return res.json(
+                {
+                    InfoResponse:{
+                        count: 0,
+                        next: 2 ,
+                        pages: 1 ,
+                        prev: 0},
+                        results: psts
+                    }
+            );             
+        }else{
+            return res.send({
+                success:false,
+                psts
+            });
+        } 
+    }
+  
 });
 
 router.get('/admintestimonial', async function(req, res){

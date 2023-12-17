@@ -267,10 +267,10 @@ module.exports.uploadTransaction = async function uploadTransaction(post){
                                 snapshots1.docs.map(async orderItem2 => {
                                     let ot2=orderItem2.data();
                                     if(post.transaction_type == "transfer"){
-                                        let currentbalance = ot2.current_balance - post.transaction_amount;
+                                        let currentbalance = Number(ot2.current_balance) - Number(post.transaction_amount);
                                         await db.collection("account").doc(orderItem2.id).update({ current_balance: currentbalance });
                                     }else{
-                                        let currentbalanc = ot2.current_balance + post.transaction_amount;
+                                        let currentbalanc = Number(ot2.current_balance) + Number(post.transaction_amount);
                                         await db.collection("account").doc(orderItem2.id).update({ current_balance: currentbalanc });
                                     }
                                 })
@@ -410,7 +410,7 @@ module.exports.getAllTransactionsByEmail = async function getAllTransactionsByEm
     
     let collection = [];
     
-    await path_ref.get().then((querySnapshot) => {
+    await path_ref.where("initiator","==",email).get().then((querySnapshot) => {
         querySnapshot.docs.map((doc) => {
             collection.push(doc.data());
         })
