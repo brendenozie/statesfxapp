@@ -582,6 +582,106 @@ router.get('/get-transactions', async function(req, res){
 
 });
 
+router.get('/get-users', async function(req, res){
+    
+    if(!req.session.cart) {
+        req.session.cart = {mtoken:"",
+        phone: "", 
+        id: "",
+        firstname: "",
+        lastname: "",
+        subscription: "",
+        course: "",
+        message: "",
+        merchantRequestID:'',
+        checkoutRequestID:''
+        };
+    }   
+
+    var psts=await srs.getAllUsers();
+        if(psts){         
+            return res.json(
+                {
+                    InfoResponse:{
+                        count: 0,
+                        next: 2 ,
+                        pages: 1 ,
+                        prev: 0},
+                        results: psts
+                    }
+            );             
+        }else{
+            return res.send({
+                success:false,
+                psts
+            });
+        } 
+
+    // var userEmail=req.query.userEmail;
+
+    // if(userEmail){
+    //     var psts=await srs.getAllTransactionsByEmail(userEmail);
+    //     if(psts){         
+    //         return res.json({
+    //             InfoResponse:{
+    //                 count: 0,
+    //                 next: 2 ,
+    //                 pages: 1 ,
+    //                 prev: 0
+    //             },
+    //             results: psts
+    //         });             
+    //     }else{
+    //         return res.send({
+    //             success:false,
+    //             psts
+    //         });
+    //     }  
+    // }else{
+    //     var psts=await srs.getAllTransactions();
+    //     if(psts){         
+    //         return res.json(
+    //             {
+    //                 InfoResponse:{
+    //                     count: 0,
+    //                     next: 2 ,
+    //                     pages: 1 ,
+    //                     prev: 0},
+    //                     results: psts
+    //                 }
+    //         );             
+    //     }else{
+    //         return res.send({
+    //             success:false,
+    //             psts
+    //         });
+    //     } 
+    // }
+  
+
+    // var psts=await srs.getAllTransactions();
+
+    // if(psts){         
+    //     return res.json({InfoResponse:{
+    //         count: 0,
+    //         next: 2 ,
+    //         pages: 1 ,
+    //         prev: 0},
+    //         results: psts
+    //     });                 
+    //     // return res.send({
+    //     //     success:true,
+    //     //     data:psts
+    //     // });            
+    // }else{
+    //     return res.send({
+    //         success:false,
+    //         psts
+    //     });
+    // } 
+
+});
+
 router.get('/get-accounts', async function(req, res){
     
     if(!req.session.cart) {
@@ -1109,7 +1209,6 @@ router.get('/viewchats/:id',async (req, res)=>{
     res.render('viewchatstest',{cart:req.session.cart,accs:result});
 });
 
-
 router.get('/viewreferrals/:id',async (req, res)=>{    
     
     if(!req.session.cart) {
@@ -1522,7 +1621,6 @@ router.post('/updatezoomlink', async (req, res) => {
         });
     }
 });
-
 
 router.post('/loaduid', async (req, res) => {
 

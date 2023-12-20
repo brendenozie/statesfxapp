@@ -389,6 +389,22 @@ module.exports.getApprovedTestimonials=async function getApprovedTestimonials(){
 
 };
 
+
+// get users
+module.exports.getAllUsers = async function getAllUsers() {
+    const path_ref = db.collection("users");
+    
+    let collection = [];
+    
+    await path_ref.get().then((querySnapshot) => {
+        querySnapshot.docs.map((doc) => {
+            collection.push(doc.data());
+        })
+      })
+
+    return collection;
+}
+
 // get transaction
 module.exports.getAllTransactions = async function getAllTransactions() {
     const path_ref = db.collection("transactions");
