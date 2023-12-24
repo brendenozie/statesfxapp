@@ -1368,14 +1368,27 @@ router.post('/post-transfers', async (req, res) => {
         };
     }   
 
+    // let post = {
+    //     initiator: req.body.initiator,
+    //     recepient:req.body.recepient,
+    //     status:req.body.status,
+    //     transaction_amount:req.body.transaction_amount,
+    //     transaction_type:req.body.transaction_type,
+    //     dte: Date.now().toLocaleString()
+    // };
+
     let post = {
-        initiator: req.body.initiator,
-        recepient:req.body.recepient,
-        status:req.body.status,
-        transaction_amount:req.body.transaction_amount,
-        transaction_type:req.body.transaction_type,
-        dte: Date.now().toLocaleString()
-    };
+        initiatorName: req.body.initiatorName,
+        initiatorEmail: req.body.initiatorEmail,
+    //    val recepientId: String,
+        recepientName: req.body.recepientName,
+        recepientEmail: req.body.recepientEmail,
+        status: req.body.status,
+        dte: Date.now().toLocaleString(),
+        transaction_amount: req.body.transaction_amount,
+        // transaction_id: req.body.initiator,
+        transaction_type: req.body.transaction_type,
+    }
     
     var lgin=await srs.uploadTransaction(post);
 

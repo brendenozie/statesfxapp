@@ -8,6 +8,10 @@ admin.initializeApp({
     credential: admin.credential.cert(serviceccount),
     databaseURL: 'https://tradecafe58-d616c-default-rtdb.firebaseio.com/'
 });
+//two names --accountnumber//email
+//click dropdown to show details
+//delivered//sent//completed
+//received
 
 
 var db = admin.firestore();
@@ -16,7 +20,7 @@ module.exports.database=db;
 
 module.exports.setUser = async function setUser(userDetails) {
     let path_ref = await db.collection('users').add(userDetails);
-    await db.collection('users').doc(path_ref.id).set({user_id: true}, { merge: true }); 
+    await db.collection('users').doc(path_ref.id).set({user_id: path_ref.id}, { merge: true }); 
     return path_ref;
 }
 
@@ -257,13 +261,14 @@ module.exports.uploadTransaction = async function uploadTransaction(post){
 
     let userRef = db.collection("users");
 
-    await userRef.where('email', '==', `${post.initiator}`)
+    await userRef.where('email', '==', `${post.initiatorEmail}`)
     .get()
     .then(async snapshots => {
-            snapshots.docs.map(async orderItem => {
-                await db.collection("account").where('user_id', '==', `${orderItem.id}`)
+            snapshots.docs.map(async usrs => {
+                await db.collection("account").where('user_id', '==', `${usrs.id}`)
                         .get()
-                        .then(snapshots1 => {
+                        .then(async snapshots1 => {
+                            if(snapshots1.docs.length>0){
                                 snapshots1.docs.map(async orderItem2 => {
                                     let ot2=orderItem2.data();
                                     if(post.transaction_type == "transfer"){
@@ -274,12 +279,16 @@ module.exports.uploadTransaction = async function uploadTransaction(post){
                                         await db.collection("account").doc(orderItem2.id).update({ current_balance: currentbalanc });
                                     }
                                 })
+                            }else{
+                                let newAccount = await db.collection("account").add({ current_balance: post.transaction_amount,user_id:usrs.id });
+                                await db.collection('account').doc(newAccount.id).set({account_id: newAccount.id}, { merge: true }); 
+                            }
                         });
             })
     });
 
     let newDoc = await db.collection('transactions').add(post); 
-    await db.collection('transactions').doc(newDoc.id).set({transaction_id: true}, { merge: true }); 
+    await db.collection('transactions').doc(newDoc.id).set({transaction_id: newDoc.id}, { merge: true }); 
   
     return post;
 }
@@ -426,7 +435,7 @@ module.exports.getAllTransactionsByEmail = async function getAllTransactionsByEm
     
     let collection = [];
     
-    await path_ref.where("initiator","==",email).get().then((querySnapshot) => {
+    await path_ref.where("initiatorEmail","==",email).get().then((querySnapshot) => {
         querySnapshot.docs.map((doc) => {
             collection.push(doc.data());
         })
