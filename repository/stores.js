@@ -290,7 +290,10 @@ module.exports.uploadTransaction = async function uploadTransaction(post){
     let newDoc = await db.collection('transactions').add(post); 
     await db.collection('transactions').doc(newDoc.id).set({transaction_id: newDoc.id}, { merge: true }); 
   
-    return post;
+    newDoc =await db.collection('transactions').doc(newDoc.id).get();
+    console.log(newDoc.data());
+
+    return newDoc.data();
 }
 
 
