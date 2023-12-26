@@ -273,14 +273,17 @@ module.exports.uploadTransaction = async function uploadTransaction(post){
                                     let ot2=orderItem2.data();
                                     if(post.transaction_type == "transfer"){
                                         let currentbalance = Number(ot2.current_balance) - Number(post.transaction_amount);
+                                        currentbalance = Math.round((currentbalance + Number.EPSILON) * 100) / 100;
                                         await db.collection("account").doc(orderItem2.id).update({ current_balance: currentbalance });
                                     }else{
                                         let currentbalanc = Number(ot2.current_balance) + Number(post.transaction_amount);
+                                        currentbalanc = Math.round((currentbalanc + Number.EPSILON) * 100) / 100;
                                         await db.collection("account").doc(orderItem2.id).update({ current_balance: currentbalanc });
                                     }
                                 })
                             }else{
-                                let newAccount = await db.collection("account").add({ current_balance: post.transaction_amount,user_id:usrs.id });
+                                let currentbalanc = Math.round((post.transaction_amount + Number.EPSILON) * 100) / 100;
+                                let newAccount = await db.collection("account").add({ current_balance:currentbalanc ,user_id:usrs.id });
                                 await db.collection('account').doc(newAccount.id).set({account_id: newAccount.id}, { merge: true }); 
                             }
                         });
@@ -291,7 +294,6 @@ module.exports.uploadTransaction = async function uploadTransaction(post){
     await db.collection('transactions').doc(newDoc.id).set({transaction_id: newDoc.id}, { merge: true }); 
   
     newDoc =await db.collection('transactions').doc(newDoc.id).get();
-    console.log(newDoc.data());
 
     return newDoc.data();
 }
