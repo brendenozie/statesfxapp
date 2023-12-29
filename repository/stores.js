@@ -21,6 +21,10 @@ module.exports.database=db;
 module.exports.setUser = async function setUser(userDetails) {
     let path_ref = await db.collection('users').add(userDetails);
     await db.collection('users').doc(path_ref.id).set({user_id: path_ref.id}, { merge: true }); 
+
+    let newAccount = await db.collection("account").add({ current_balance:"0.00" ,user_id:path_ref.id });
+    await db.collection('account').doc(newAccount.id).set({account_id: newAccount.id}, { merge: true }); 
+
     return path_ref;
 }
 
@@ -282,7 +286,7 @@ module.exports.uploadTransaction = async function uploadTransaction(post){
                                     }
                                 })
                             }else{
-                                let currentbalanc = Math.round((post.transaction_amount + Number.EPSILON) * 100) / 100;
+                                let currentbalanc = Math.round((Number(post.transaction_amount) + Number.EPSILON) * 100) / 100;
                                 let newAccount = await db.collection("account").add({ current_balance:currentbalanc ,user_id:usrs.id });
                                 await db.collection('account').doc(newAccount.id).set({account_id: newAccount.id}, { merge: true }); 
                             }
